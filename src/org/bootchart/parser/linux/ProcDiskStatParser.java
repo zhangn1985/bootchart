@@ -44,7 +44,7 @@ import org.bootchart.common.Stats;
 public class ProcDiskStatParser {
 	private static final Logger log = Logger.getLogger(ProcDiskStatParser.class.getName());
 
-	private static final String DISK_REGEX = "hd.|sd.";
+	private static final String DISK_REGEX = "hd.|sd.|mmcblk.|vd.";
 	
 	/** DiskStatSample encapsulates a /proc/diskstat sample. */
 	private static class DiskStatSample {
@@ -102,7 +102,7 @@ public class ProcDiskStatParser {
 				line = line.trim();
 				// {major minor name rio rmerge rsect ruse wio wmerge wsect wuse running use aveq}
 				String[] tokens = line.split("\\s+");
-				if (tokens.length != 14 || !tokens[2].matches(DISK_REGEX)) {
+				if (tokens.length != 18 || !tokens[2].matches(DISK_REGEX)) {
 					line = reader.readLine();
 					continue;
 				}
