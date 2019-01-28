@@ -569,7 +569,9 @@ public class SVGRenderer extends Renderer {
 			labelPos = "dx=\"2\" dy=\""+ (procH - 1) + "\" x=\"0\" y=\"0\"";
 		}
 		String labelText = proc.cmd;
+		labelText = labelText.replace("<", "&lt;").replace(">", "&gt;");
 		String titleText = Common.getProcessDesc(proc, procTree.startTime);
+		titleText = titleText.replace("<", "&lt;").replace(">", "&gt;");
 
 		Object[] procArgs =
 			{position, timeline, border, connector, labelPos, labelText, titleText};
