@@ -1,0 +1,6 @@
+build/
+*.jar
+*.png
+*.eps
+*.svg
+*.svgz
