@@ -19,33 +19,37 @@
  */
 package org.bootchart.common;
 
-/**
- * BootStats encapsulates boot statistics.  This includes global CPU and
- * disk I/O statistics and a process tree with process accounting.
- */
-public class BootStats {
-	/** CPU statistics.*/
-	public Stats cpuStats;
-	/** Disk I/O utilization and throughput statistics.*/
-	public Stats diskStats;
-	/** Free and available memory.*/
-	public Stats memStats;
-	/** The process tree.*/
-	public ProcessTree procTree;
-	
-	/**
-	 * Creates a new boot statistics instance.
-	 * 
-	 * @param cpuStats   CPU statistics
-	 * @param diskStats  disk utilization and throughput I/O statistics
-	 * @param memStats   Free/available memory stats
-	 * @param procTree   the process tree
-	 */
+import java.util.Date;
 
-	public BootStats(Stats cpuStats, Stats diskStats, Stats memStats, ProcessTree procTree) {
-		this.cpuStats = cpuStats;
-		this.diskStats = diskStats;
-		this.memStats = memStats;
-		this.procTree = procTree;
+/**
+ * Memory stats sample.
+ */
+public class MEMSample extends Sample {
+	/** free memory. */
+	public double free;
+	/** available memory. */
+	public double available;
+
+	/**
+	 * Creates a new sample.
+	 *
+	 * @param time  sample time
+	 * @param free  free memory
+	 * @param available   available memory
+	 */
+	public MEMSample(Date time, double free, double available) {
+		this.time = time != null ? new Date(time.getTime()) : null;
+		this.free = free;
+		this.available = available;
+	}
+
+	/**
+	 * Returns the string representation of the sample.
+	 *
+	 * @return  string representation
+	 */
+	public String toString() {
+		String t = time != null ? time.getTime() + "\t" : "";
+		return t + free + "\t" + available;
 	}
 }

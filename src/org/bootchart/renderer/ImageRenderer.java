@@ -44,6 +44,7 @@ import java.util.logging.Logger;
 
 import org.bootchart.common.BootStats;
 import org.bootchart.common.CPUSample;
+import org.bootchart.common.MEMSample;
 import org.bootchart.common.Common;
 import org.bootchart.common.DiskTPutSample;
 import org.bootchart.common.DiskUtilSample;
@@ -93,6 +94,11 @@ public abstract class ImageRenderer extends Renderer {
 	private static final Color DISK_TPUT_COLOR = new Color(50, 180, 50, 255);
 	/** CPU load chart color. */
 	private static final Color FILE_OPEN_COLOR = new Color(50, 180, 180, 255);
+
+	/** Free Memory color. */
+	private static final Color FREE_MEM_COLOR = new Color(50, 180, 50, 255);
+	/** Available Memory color. */
+	private static final Color AVAIL_MEM_COLOR = new Color(50, 180, 180, 255);
 	
 	/** Process border color. */
 	private static final Color PROC_BORDER_COLOR = new Color(180, 180, 180, 255);
@@ -162,9 +168,10 @@ public abstract class ImageRenderer extends Renderer {
 		
 		Stats diskStats = bootStats.diskStats;
 		Stats cpuStats = bootStats.cpuStats;
+		Stats memStats = bootStats.memStats;
 		ProcessTree procTree = bootStats.procTree;
 		
-		int headerH = 280;
+		int headerH = 365;
 		int barH = 55;
 		// offsets
 		int offX = 10;
@@ -225,7 +232,7 @@ public abstract class ImageRenderer extends Renderer {
 		
 		// render bar legend
 		g.setFont(LEGEND_FONT);
-		int legY = rectY - 2*barH - 6*offY;
+		int legY = rectY - 3*barH - 9*offY;
 		int legX = offX;
 		int legS = 10;
 		if (hasSamples(cpuStats, CPUSample.class)) {
@@ -248,7 +255,7 @@ public abstract class ImageRenderer extends Renderer {
 		
 		legX = offX;
 		if (hasSamples(diskStats, DiskTPutSample.class)) {
-			legY = rectY - barH - 4*offY;
+			legY = rectY - 2*barH - 7*offY;
 			legX = offX;
 			setColor(g, DISK_TPUT_COLOR);
 			g.fillRect(legX, legY - legS/2, legS + 1, 3);
@@ -275,6 +282,25 @@ public abstract class ImageRenderer extends Renderer {
 			g.drawString("Files opened", legX + legS + 5, legY);
 			legX += 120;
 		}
+
+		legX = offX;
+		if (hasSamples(memStats, MEMSample.class)) {
+			legY = rectY - barH - 5*offY;
+			legX = offX;
+			setColor(g, FREE_MEM_COLOR);
+			g.fillRect(legX, legY - legS/2, legS + 1, 3);
+			g.fillArc(legX + legS/2 - 2, legY - legS/2 - 1, 5, 5, 0, 360);
+			setColor(g, TEXT_COLOR);
+			g.drawString("Free Memory", legX + legS + 5, legY);
+			legX += 120;
+			setColor(g, AVAIL_MEM_COLOR);
+			g.fillRect(legX, legY - legS/2, legS + 1, 3);
+			g.fillArc(legX + legS/2 - 2, legY - legS/2 - 1, 5, 5, 0, 360);
+			setColor(g, TEXT_COLOR);
+			g.drawString("Available Memory", legX + legS + 5, legY);
+			legX += 120;
+		}
+
 		int maxLegX = legX;
 
 		// process states
@@ -318,7 +344,7 @@ public abstract class ImageRenderer extends Renderer {
 		legX += 120;
 
 		// render I/O wait
-		int barY = rectY - 4*offY - barH - offX - 5;
+		int barY = rectY - 7*offY - 2*barH - offX - 5;
 		setColor(g, BORDER_COLOR);
 		g.drawRect(rectX, barY - barH, rectW, barH);
 		for (int i = 0; i <= rectW; i += secW) {
@@ -405,7 +431,7 @@ public abstract class ImageRenderer extends Renderer {
 			int pi = 0;
 			
 	  		// render I/O utilization
-			barY = rectY - 2*offY - offY - 5;
+			barY = rectY - barH - 5*offY - offY - 5;
 			setColor(g, BORDER_COLOR);
 			g.drawRect(rectX, barY - barH, rectW, barH);
 			for (int i = 0; i <= rectW; i += secW) {
@@ -576,6 +602,86 @@ public abstract class ImageRenderer extends Renderer {
 			
 			if (g instanceof Graphics2D) {
 				((Graphics2D)g).setStroke(new BasicStroke());
+			}
+		}
+
+		// render memstats
+		barY = rectY - 4*offY;
+		setColor(g, BORDER_COLOR);
+		g.drawRect(rectX, barY - barH, rectW, barH);
+		for (int i = 0; i <= rectW; i += secW) {
+			if ((i / secW) % 5 == 0) {
+				setColor(g, TICK_COLOR_BOLD);
+			} else {
+				setColor(g, TICK_COLOR);
+			}
+			g.drawLine(rectX + i, barY - barH, rectX + i, barY);
+		}
+
+		if (memStats != null) {
+			Point lastPoint = null;
+			int[] xPoints = new int[memStats.getSamples().size() + 2];
+			int[] yPoints = new int[memStats.getSamples().size() + 2];
+
+			setColor(g, FREE_MEM_COLOR);
+			lastPoint = null;
+			for (Iterator i = memStats.getSamples().iterator(); i.hasNext();) {
+				Sample s = (Sample)i.next();
+				if (!(s instanceof MEMSample)) {
+					continue;
+				}
+				MEMSample sample = (MEMSample)s;
+				Date endTime =
+					new Date(procTree.startTime.getTime() + procTree.duration);
+				if (sample.time.compareTo(procTree.startTime) < 0
+					|| sample.time.compareTo(endTime) > 0) {
+					continue;
+				}
+				int posX = rectX
+					+ (int) ((sample.time.getTime() - procTree.startTime.getTime())
+						* rectW / procTree.duration);
+				if (posX < rectX || posX > rectX + rectW) {
+					//log.warning("Cropped sample: " + sample);
+					continue;
+				}
+				int posY = barY - (int) (sample.free * barH);
+				if (lastPoint != null) {
+					g.drawLine(lastPoint.x, lastPoint.y, posX, posY);
+				}
+				lastPoint = new Point(posX, posY);
+				//int r = 3;
+				//g.fillArc(posX - r/2, posY - r/2, r, r, 0, 360);
+			}
+
+			setColor(g, AVAIL_MEM_COLOR);
+			lastPoint = null;
+			for (Iterator i = memStats.getSamples().iterator(); i.hasNext();) {
+				Sample s = (Sample)i.next();
+				if (!(s instanceof MEMSample)) {
+					continue;
+				}
+				MEMSample sample = (MEMSample)s;
+				Date endTime =
+					new Date(procTree.startTime.getTime() + procTree.duration);
+				if (sample.time.compareTo(procTree.startTime) < 0
+					|| sample.time.compareTo(endTime) > 0) {
+					continue;
+				}
+				int posX = rectX
+					+ (int) ((sample.time.getTime() - procTree.startTime.getTime())
+						* rectW / procTree.duration);
+				if (posX < rectX || posX > rectX + rectW) {
+					//log.warning("Cropped sample: " + sample);
+					continue;
+				}
+				int posY = barY - (int) (sample.available * barH);
+
+				if (lastPoint != null) {
+					g.drawLine(lastPoint.x, lastPoint.y, posX, posY);
+				}
+				lastPoint = new Point(posX, posY);
+				//int r = 3;
+				//g.fillArc(posX - r/2, posY - r/2, r, r, 0, 360);
 			}
 		}
 

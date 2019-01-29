@@ -55,6 +55,7 @@ import org.bootchart.parser.linux.ProcDiskStatParser;
 import org.bootchart.parser.linux.ProcPsParser;
 import org.bootchart.parser.linux.ProcStatParser;
 import org.bootchart.parser.linux.PsParser;
+import org.bootchart.parser.linux.MEMParser;
 import org.bootchart.renderer.EPSRenderer;
 import org.bootchart.renderer.PNGRenderer;
 import org.bootchart.renderer.Renderer;
@@ -196,6 +197,7 @@ public class Main {
 		Map pidNameMap = null;
 		Map forkMap = null;
 		Stats cpuStats = null;
+		Stats memStats = null;
 		Stats diskStats = null;
 		PsStats psStats = null;
 		BootStats bootStats = null;
@@ -246,6 +248,10 @@ public class Main {
 			} else if (logName.equals("proc_stat.log")) {
 				// read the /proc/stat log file
 				cpuStats =  ProcStatParser.parseLog(is);
+
+			} else if (logName.equals("proc_mem.log")) {
+				// read the /proc/meminfo log file
+				memStats =  MEMParser.parseLog(is);
 				
 			} else if (logName.equals("proc_diskstats.log")) {
 				// read the /proc/diskstats log file
@@ -288,7 +294,7 @@ public class Main {
 				}
 			}
 			//log.fine(procTree.toString());
-			bootStats = new BootStats(cpuStats, diskStats, procTree);
+			bootStats = new BootStats(cpuStats, diskStats, memStats, procTree);
 		}
 		
 		Renderer renderer = null;
