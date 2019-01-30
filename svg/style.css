@@ -61,6 +61,14 @@
 	stroke: #32b432;
 	fill-opacity: 0;
 }
+.MemFree {
+	stroke: #32b432;
+	fill-opacity: 0;
+}
+.MemAvail {
+	stroke: #32B4B4;
+	fill-opacity: 0;
+}
 .DiskLabel {
 	font-family: sans-serif;
 	font-size: 9pt;

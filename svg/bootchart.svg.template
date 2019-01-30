@@ -72,9 +72,28 @@
 			{14}
 		</g>
 	</g>
+
+	<!-- Memory stats chart -->
+	<g transform="translate(0, 290)" style="fill: none;">
+		<g transform="translate(0, -5)">
+			<line x1="1px" y1="-12px" x2="13px" y2="-12px" class="MemFree"/><circle class="MemFree" cx="7" cy="-12" r="2"/><text class="LegendText" dx="15px" dy="-7px">Free Memory</text>
+			<line x1="120px" y1="-12px" x2="133px" y2="-12px" class="MemAvail"/><circle class="MemAvail" cx="127" cy="-12" r="2"/><text class="LegendText" dx="135px" dy="-7px">Available Memory</text>
+		</g>
+
+		<rect class="PerfChart" x="0" y="0" width="100%" height="50px"/>
+		<g class="Tick" transform="translate(0.5, 0.5)">
+			<!-- Memory time ticks -->
+			{18}
+		</g>
+		<!-- Free Memory chart -->
+		<polyline class="MemFree" points="{19}"/>
+
+		<!-- Available Memory chart -->
+		<polyline class="MemAvail" points="{20}"/>
+	</g>
 	
 	<!-- Process dependency chart -->
-	<g transform="translate(0, 300)" style="fill: none;">
+	<g transform="translate(0, 380)" style="fill: none;">
 		<g transform="translate(0, -30)">
 		    <!--<rect class="LegendBack" x="0px" y="0px" width="480px" height="16px"/>-->
 			<rect x="2" y="3" width="10px" height="10px" class="Running"/><text class="LegendText" dx="15px" dy="1em">Running (%cpu)</text>
